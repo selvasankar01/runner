@@ -20,8 +20,11 @@ console.log(`Height of area = ${window.innerHeight} and width of area = ${window
 
 
 var score = 0;
-function scoreMaintainer(){
+function scoreMaintainer(speed){
     score += 1;
+    if(score%1000){
+        speed += 2;
+    }
     document.querySelector('span').textContent = score;
 }
 
@@ -78,21 +81,12 @@ class blockDetails{
                 this.shiftCounter++;
             }
         }
-
-        // if (this.blockPosition){
-        //     this.blockPosition = false;
-        //     this.y = 0;
-        //     this.blockPositionSetter();
-        // } //true => down ; false => up;
-        // else if(!this.blockPosition){
-        //     this.blockPosition = true;
-        //     this.y = height - this.side;
-        //     this.blockPositionSetter();
-        //}
     }
 
 }
 
+
+var holesp = 5;
 class pits{
 
     constructor (holeWidth,movingPixelSpeed,position){
@@ -151,12 +145,12 @@ class fallingDown{
 class obstacles{
 
     constructor(){
-        let shapes = ['square','circle','rectangle','triangle'];
-        this.shape = shapes[randomNumber(0,3)];
+        let shapes = ['square','circle','triangle'];
+        this.shape = shapes[randomNumber(0,2)];
         this.side = width/15;
         this.y = height - this.side;
         this.x = width;
-        this.speed = 2;
+        this.speed = randomNumber(1,4);
         this.direction = true;  //false is top and have to go down while true means have to go up
         console.log(this.shape);
     }
@@ -174,17 +168,13 @@ class obstacles{
                 cb.fill();
                 cb.closePath();
                 break;
-            case 'rectangle':
-                cb.fillStyle = '#4C4C6D';
-                cb.fillRect(this.x,this.y,this.side*2,this.side);
-                break;
             case 'triangle':
                 let c = new Path2D();
                 c.moveTo(this.x,this.y);
-                c.lineTo(this.x-50,this.y+50);
-                c.lineTo(this.x+50,this.y+50);
+                c.lineTo(this.x-this.side/2,this.y+this.side/2);
+                c.lineTo(this.x+this.side/2,this.y+this.side/2);
                 c.lineTo(this.x,this.y);
-                cb.fillStyle = '#E8F6EF';
+                cb.fillStyle = '#4C4C6D';
                 cb.fill(c);
                 break;
 
@@ -193,7 +183,8 @@ class obstacles{
     }
 
     movingObstacle(){
-        this.x -= 2;
+        // console.log(`(x,y)-(${this.x},${this.y})`);
+        this.x -= this.speed;
         if(this.direction){
             this.y -= 1;
             if(Math.floor(this.y) == 0){
@@ -208,12 +199,61 @@ class obstacles{
             }
         }
     }
+
+    checkCollision(coordinateX,coordinateY){
+        // switch (this.shape) {
+            // case 'circle':
+                var collisionX1 = (this.x+(this.side));
+                var collisionX2 = (this.x-(this.side));
+                console.log(`(x,y) = (${coordinateX},${coordinateY}):(X1,X2) = (${collisionX1},${collisionX2})`);
+                if((coordinateX <= this.x && coordinateX >= collisionX2+2)|| (coordinateX <= collisionX1 && coordinateX>= this.x)){
+                    var collisionY1 = this.y-this.side;
+                    var collisionY2 = this.y+this.side;
+                    console.log(`(x,y) = (${coordinateX},${coordinateY}):(Y1,Y2) = (${collisionY1},${collisionY2})`);
+                    if((coordinateY <= this.y && coordinateY>= collisionY2)){
+                        console.log(`(x,y) = (${coordinateX},${coordinateY}):(X,Y) = (${collisionX2},${collisionY2})`);
+                        console.log('Y2 and X2');
+                        alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${highScore}`);
+                    }
+                    else if(coordinateY <= collisionY1 && coordinateY>=this.y){
+                        console.log(`(x,y) = (${coordinateX},${coordinateY}):(X,Y) = (${collisionX2},${collisionY1})`);
+                        console.log('Y1 and X2');
+                        alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${highScore}`);
+                    }                   
+                }
+                // break;
+            // case 'triangle':
+            //     collisionX1 = this.x+this.side/2;
+            //     collisionX2 = this.x-this.side/2;
+            //     console.log(`(x,y) = (${coordinateX},${coordinateY}):(X1,X2) = (${collisionX1},${collisionX2})`);
+            //     if((coordinateX <= collisionX1 && coordinateX>=collisionX1-10) || (coordinateX<=collisionX2+10 && coordinateX>=collisionX2-10)){
+            //         collisionY1 = this.y+this.side/2;
+            //         collisionY2 = this.y-this.side;
+            //         if((coordinateY <= collisionY2+10 && coordinateY>= collisionY2-10)||(coordinateY <= collisionY1+10 && coordinateY>= collisionY1-10)){
+            //             alert('Game Over!!');
+            //         }
+            //     }
+            //     break;
+        //     default:
+        //         var collisionX1 = this.x+this.side;
+        //         var collisionX2 = this.x-this.side;
+        //         console.log(`(x,y) = (${coordinateX},${coordinateY}):(X1,X2) = (${collisionX1},${collisionX2})`);
+        //         if((coordinateX <= collisionX1 && coordinateX>=collisionX1+this.side) || (coordinateX<= this.side && coordinateX>=collisionX2)){
+        //             var collisionY1 = this.y-this.side;
+        //             var collisionY2 = this.y+this.side;
+        //             if((coordinateY <= this.y && coordinateY>= collisionY2)||(coordinateY <= collisionY1 && coordinateY>= this.y)){
+        //                 alert('Game Over!!');
+        //             }
+        //         }
+        //         break;
+        // }
+    }
 }
 
 function holeCreation(){
     setInterval(() => {
         let pos = positions[randomNumber(0,1)];
-        holes.push(new pits(width/8,5,pos));
+        holes.push(new pits(width/8,holesp,pos));
     }, randomNumber(800,2500));
 }
 
@@ -249,6 +289,18 @@ function removeObstacles(e){
     }
 }
 
+var hscore = localStorage.getItem('high');
+function highScore(){
+    if(!hscore){
+        localStorage.setItem('high',score);
+    }
+    else if(hscore){
+        if(score > hscore){
+            localStorage.setItem('high',score);
+        }
+    }
+    hscore = localStorage.getItem('high');
+}
 //falling animation with variable for cancelling it later...
 var fallingAnimationVariable;
 function fallingAnimation(){
@@ -263,7 +315,8 @@ function fallingAnimation(){
         fall.z += fall.speed;
         if(fall.y > height){
             cancelAnimationFrame(fallingAnimationVariable);
-            alert('Game Over!!');
+            highScore();
+            alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${hscore}`);
         }
     }
     else if(!player.blockPosition){
@@ -274,7 +327,8 @@ function fallingAnimation(){
         fall.z -= fall.speed;
         if(fall.y < - (fall.side+5)){
             cancelAnimationFrame(fallingAnimationVariable);
-            alert('Game Over!!');
+            highScore();
+            alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${hscore}`);
         }
     }
 }
@@ -288,15 +342,15 @@ function animate (){
     cb.clearRect(0,0,width,height);
     background();
     // player.blockPositionSetter();
-    scoreMaintainer(); // maintes scores
+    scoreMaintainer(holesp); // maintes scores
     fall.updateY(); //updates y coordinate of player such that it touches the base
     for(let i=0;i < (holes.length>obs.length? holes.length:obs.length);i++){
-
         if(obs[i]){
-            obs[i].createObstacle();
-            removeObstacles(obs[i]);
+            let obstacle = obs[i];
+            obstacle.createObstacle();
+            removeObstacles(obstacle);
+            obstacle.checkCollision(player.x,player.y);
         }
-
         if(holes[i]){
             let hole = holes[i];
             hole.pitMovement();
@@ -314,28 +368,7 @@ function animate (){
             }
         }
     }
-    // obs.forEach((e)=>{
-    //     e.createObstacle();
-    // });
     player.blockSide(); //draws player square
-    // holes.forEach((e,n)=>{
-    //     e.pitMovement();
-    //     removeHoles(e); // removes hole instances thathave crossed visible region
-    //     let collision = Math.floor(player.x - player.side/4)
-    //     if(Math.floor(e.x) <= collision+10 && Math.floor(e.x) >= collision-10 ){
-    //         if(player.blockPosition && e.position === 'down'){
-    //             cancelAnimationFrame(animateVariable)
-    //             fallingAnimation();
-    //         }
-    //         else if (!player.blockPosition && e.position === 'up'){
-    //             console.log('Hi Ho');
-    //             cancelAnimationFrame(animateVariable);
-    //             fallingAnimation();
-    //         }
-    //     }
-    //     console.log(`obstacles length = ${obs.length}`);
-    //     console.log(holes.length);   
-    // });
 }
 
 // Variables needed globals
@@ -347,6 +380,7 @@ let fall = new fallingDown();
 setInterval(() => {
     console.log('Obstacle created');
     obs.push(new obstacles());
+    highScore();
 }, randomNumber(2000,2500));
 
 // Iniatiation Functions
