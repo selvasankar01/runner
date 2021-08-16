@@ -146,7 +146,7 @@ class obstacles{
 
     constructor(){
         let shapes = ['square','circle','triangle'];
-        this.shape = shapes[randomNumber(0,2)];
+        this.shape = 'triangle';//shapes[randomNumber(0,2)];
         this.side = width/15;
         this.y = height - this.side;
         this.x = width;
@@ -183,7 +183,6 @@ class obstacles{
     }
 
     movingObstacle(){
-        // console.log(`(x,y)-(${this.x},${this.y})`);
         this.x -= this.speed;
         if(this.direction){
             this.y -= 1;
@@ -201,63 +200,33 @@ class obstacles{
     }
 
     checkCollision(coordinateX,coordinateY,side){
-        // switch (this.shape) {
-            // case 'circle':
-                var collisionX1 = coordinateX+side;
-                var collisionX2 = coordinateX-this.side;
-                // console.log(`(x,y) = (${coordinateX},${coordinateY}):(X1,X2) = (${collisionX1},${collisionX2})`);
-                // if((coordinateX <= this.x && coordinateX >= collisionX2+2)|| (coordinateX <= collisionX1 && coordinateX>= this.x)){
-                //     var collisionY1 = this.y-this.side;
-                //     var collisionY2 = this.y+this.side;
-                //     console.log(`(x,y) = (${coordinateX},${coordinateY}):(Y1,Y2) = (${collisionY1},${collisionY2})`);
-                //     if((coordinateY <= this.y && coordinateY>= collisionY2)){
-                //         console.log(`(x,y) = (${coordinateX},${coordinateY}):(X,Y) = (${collisionX2},${collisionY2})`);
-                //         console.log('Y2 and X2');
-                //         alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${highScore}`);
-                //     }
-                //     else if(coordinateY <= collisionY1 && coordinateY>=this.y){
-                //         console.log(`(x,y) = (${coordinateX},${coordinateY}):(X,Y) = (${collisionX2},${collisionY1})`);
-                //         console.log('Y1 and X2');
-                //         alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${highScore}`);
-                //     }                   
-                // }
+        var collisionX1 = coordinateX+side;
+        var collisionX2 = coordinateX-this.side;
 
-                if((this.x <= collisionX1+5)&& (this.x >= collisionX2)){
-                    console.log('inside x collision');
+        if((this.x <= collisionX1)&& (this.x >= collisionX2)){
+            console.log('inside x collision');
+
+            switch(this.shape){
+                case 'triangle':
+                    var collisionY1 = coordinateY+side/2;
+                    var collisionY2 = coordinateY-this.side/2;
+                    break;
+                default:
                     var collisionY1 = coordinateY+side;
                     var collisionY2 = coordinateY-this.side;
-                    if((this.x <= collisionY1+5)&& (this.x >= collisionY2)){
-                        console.log('inside y collision');
-                        console.log(`X-player,Y-player = (${coordinateX},${coordinateY}z`);
-                        alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${highScore}`);
-                    }
-                }
-                // break;
-            // case 'triangle':
-            //     collisionX1 = this.x+this.side/2;
-            //     collisionX2 = this.x-this.side/2;
-            //     console.log(`(x,y) = (${coordinateX},${coordinateY}):(X1,X2) = (${collisionX1},${collisionX2})`);
-            //     if((coordinateX <= collisionX1 && coordinateX>=collisionX1-10) || (coordinateX<=collisionX2+10 && coordinateX>=collisionX2-10)){
-            //         collisionY1 = this.y+this.side/2;
-            //         collisionY2 = this.y-this.side;
-            //         if((coordinateY <= collisionY2+10 && coordinateY>= collisionY2-10)||(coordinateY <= collisionY1+10 && coordinateY>= collisionY1-10)){
-            //             alert('Game Over!!');
-            //         }
-            //     }
-            //     break;
-        //     default:
-        //         var collisionX1 = this.x+this.side;
-        //         var collisionX2 = this.x-this.side;
-        //         console.log(`(x,y) = (${coordinateX},${coordinateY}):(X1,X2) = (${collisionX1},${collisionX2})`);
-        //         if((coordinateX <= collisionX1 && coordinateX>=collisionX1+this.side) || (coordinateX<= this.side && coordinateX>=collisionX2)){
-        //             var collisionY1 = this.y-this.side;
-        //             var collisionY2 = this.y+this.side;
-        //             if((coordinateY <= this.y && coordinateY>= collisionY2)||(coordinateY <= collisionY1 && coordinateY>= this.y)){
-        //                 alert('Game Over!!');
-        //             }
-        //         }
-        //         break;
-        // }
+                    break;
+            }
+
+            if((this.y <= collisionY1)&& (this.y >= collisionY2)){
+                console.log('inside y collision');
+                console.log(`X-player,Y-player = (${coordinateX},${coordinateY})`);
+                console.log(`collisionY1,collisionY2 = (${collisionY1},${collisionY2})`);
+                console.log(`side of player = ${side} and side of obstacle = ${this.side}`);
+                return true;
+            }
+            return false;
+        }
+
     }
 }
 
@@ -283,7 +252,7 @@ function background(){
 function removeHoles(e){
     if(e.x+player.side <= -50){
         let index = holes.indexOf(e);
-        let removedItems = holes.splice(index,1);
+        holes.splice(index,1);
     }
     else{
         return;
@@ -360,7 +329,13 @@ function animate (){
             let obstacle = obs[i];
             obstacle.createObstacle();
             removeObstacles(obstacle);
-            obstacle.checkCollision(player.x,player.y,player.side);
+            if(obstacle.checkCollision(player.x,player.y,player.side)){
+                player.blockSide();
+                cancelAnimationFrame(animateVariable);
+                highScore();
+                holes[i].pitMovement();
+                alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${hscore}`);
+            }
         }
         if(holes[i]){
             let hole = holes[i];
@@ -369,7 +344,7 @@ function animate (){
             let collision = Math.floor(player.x - player.side/4)
             if(Math.floor(hole.x) <= collision+10 && Math.floor(hole.x) >= collision-10 ){
                 if(player.blockPosition && hole.position === 'down'){
-                    cancelAnimationFrame(animateVariable)
+                    cancelAnimationFrame(animateVariable);
                     fallingAnimation();
                 }
                 else if (!player.blockPosition && hole.position === 'up'){
@@ -392,7 +367,7 @@ setInterval(() => {
     console.log('Obstacle created');
     obs.push(new obstacles());
     highScore();
-}, randomNumber(2000,2500));
+}, randomNumber(5000,6000));
 
 // Iniatiation Functions
 player.blockPositionSetter();
