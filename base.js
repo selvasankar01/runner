@@ -200,26 +200,37 @@ class obstacles{
         }
     }
 
-    checkCollision(coordinateX,coordinateY){
+    checkCollision(coordinateX,coordinateY,side){
         // switch (this.shape) {
             // case 'circle':
-                var collisionX1 = (this.x+(this.side));
-                var collisionX2 = (this.x-(this.side));
-                console.log(`(x,y) = (${coordinateX},${coordinateY}):(X1,X2) = (${collisionX1},${collisionX2})`);
-                if((coordinateX <= this.x && coordinateX >= collisionX2+2)|| (coordinateX <= collisionX1 && coordinateX>= this.x)){
-                    var collisionY1 = this.y-this.side;
-                    var collisionY2 = this.y+this.side;
-                    console.log(`(x,y) = (${coordinateX},${coordinateY}):(Y1,Y2) = (${collisionY1},${collisionY2})`);
-                    if((coordinateY <= this.y && coordinateY>= collisionY2)){
-                        console.log(`(x,y) = (${coordinateX},${coordinateY}):(X,Y) = (${collisionX2},${collisionY2})`);
-                        console.log('Y2 and X2');
+                var collisionX1 = coordinateX+side;
+                var collisionX2 = coordinateX-this.side;
+                // console.log(`(x,y) = (${coordinateX},${coordinateY}):(X1,X2) = (${collisionX1},${collisionX2})`);
+                // if((coordinateX <= this.x && coordinateX >= collisionX2+2)|| (coordinateX <= collisionX1 && coordinateX>= this.x)){
+                //     var collisionY1 = this.y-this.side;
+                //     var collisionY2 = this.y+this.side;
+                //     console.log(`(x,y) = (${coordinateX},${coordinateY}):(Y1,Y2) = (${collisionY1},${collisionY2})`);
+                //     if((coordinateY <= this.y && coordinateY>= collisionY2)){
+                //         console.log(`(x,y) = (${coordinateX},${coordinateY}):(X,Y) = (${collisionX2},${collisionY2})`);
+                //         console.log('Y2 and X2');
+                //         alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${highScore}`);
+                //     }
+                //     else if(coordinateY <= collisionY1 && coordinateY>=this.y){
+                //         console.log(`(x,y) = (${coordinateX},${coordinateY}):(X,Y) = (${collisionX2},${collisionY1})`);
+                //         console.log('Y1 and X2');
+                //         alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${highScore}`);
+                //     }                   
+                // }
+
+                if((this.x <= collisionX1+5)&& (this.x >= collisionX2)){
+                    console.log('inside x collision');
+                    var collisionY1 = coordinateY+side;
+                    var collisionY2 = coordinateY-this.side;
+                    if((this.x <= collisionY1+5)&& (this.x >= collisionY2)){
+                        console.log('inside y collision');
+                        console.log(`X-player,Y-player = (${coordinateX},${coordinateY}z`);
                         alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${highScore}`);
                     }
-                    else if(coordinateY <= collisionY1 && coordinateY>=this.y){
-                        console.log(`(x,y) = (${coordinateX},${coordinateY}):(X,Y) = (${collisionX2},${collisionY1})`);
-                        console.log('Y1 and X2');
-                        alert(`Game Over!!\nYour Score = ${score}\nHigh Score = ${highScore}`);
-                    }                   
                 }
                 // break;
             // case 'triangle':
@@ -349,7 +360,7 @@ function animate (){
             let obstacle = obs[i];
             obstacle.createObstacle();
             removeObstacles(obstacle);
-            obstacle.checkCollision(player.x,player.y);
+            obstacle.checkCollision(player.x,player.y,player.side);
         }
         if(holes[i]){
             let hole = holes[i];
@@ -394,14 +405,14 @@ addEventListener('click',()=>{
     player.rotate();
     player.shifting = true; 
     player.blockSide();
-    console.log("clicked");
+    // console.log("clicked");
 });
 
 addEventListener('touchend',()=>{
     player.rotate();
     player.shifting = true;
     player.blockSide();
-    console.log('touch');
+    // console.log('touch');
 });
 
 addEventListener('keypress',(e)=>{
@@ -409,6 +420,6 @@ addEventListener('keypress',(e)=>{
         player.rotate();
         player.shifting = true;
         player.blockSide();
-        console.log('space');
+        // console.log('space');
     }
 });
