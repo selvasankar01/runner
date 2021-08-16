@@ -380,14 +380,12 @@ addEventListener('click',()=>{
     player.rotate();
     player.shifting = true; 
     player.blockSide();
-    // console.log("clicked");
 });
 
 addEventListener('touchend',()=>{
     player.rotate();
     player.shifting = true;
     player.blockSide();
-    // console.log('touch');
 });
 
 addEventListener('keypress',(e)=>{
@@ -395,6 +393,5 @@ addEventListener('keypress',(e)=>{
         player.rotate();
         player.shifting = true;
         player.blockSide();
-        // console.log('space');
     }
 });
