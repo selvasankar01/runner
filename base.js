@@ -16,12 +16,12 @@ const positions  = ['up','down'];
     e.height = height;
 });
 
-console.log(`Height of area = ${window.innerHeight} and width of area = ${window.innerWidth}`);
-
+// console.log(`Height of area = ${window.innerHeight} and width of area = ${window.innerWidth}`);
 
 var score = 0;
 function scoreMaintainer(speed){
     score += 1;
+
     if(score%1000){
         speed += 2;
     }
@@ -41,7 +41,6 @@ class blockDetails{
     }
 
     blockPositionSetter(){
-        // console.log(`y-coordinate = ${this.y}`);
         cb.fillStyle = '#000000';
         cb.fillRect(this.x,this.y,this.side,this.side);
     }
@@ -55,6 +54,7 @@ class blockDetails{
 
     blockSide(){
         this.blockPositionSetter();
+
         if(this.shifting && this.blockPosition){
             if(this.shiftCounter === 10){
                 this.y = 0;
@@ -67,9 +67,7 @@ class blockDetails{
                 this.shiftCounter++;
             }
         }
-
         else if(this.shifting && !this.blockPosition){
-            // console.log(this.y);
             if(this.shiftCounter === 10){
                 this.y = height-this.side;
                 this.shifting = false;
@@ -85,12 +83,9 @@ class blockDetails{
 
 }
 
-
 var holesp = 5;
 class pits{
-
     constructor (holeWidth,movingPixelSpeed,position){
-
         this.x  = width + holeWidth;
         this.y = 0;
         this.width = holeWidth;
@@ -146,13 +141,12 @@ class obstacles{
 
     constructor(){
         let shapes = ['square','circle','triangle'];
-        this.shape = 'triangle';//shapes[randomNumber(0,2)];
-        this.side = width/15;
+        this.shape = shapes[randomNumber(0,2)];
+        this.side = width/30;
         this.y = height - this.side;
         this.x = width;
         this.speed = randomNumber(1,4);
         this.direction = true;  //false is top and have to go down while true means have to go up
-        console.log(this.shape);
     }
 
     createObstacle(){
@@ -177,7 +171,6 @@ class obstacles{
                 cb.fillStyle = '#4C4C6D';
                 cb.fill(c);
                 break;
-
         }
         this.movingObstacle();
     }
@@ -204,8 +197,6 @@ class obstacles{
         var collisionX2 = coordinateX-this.side;
 
         if((this.x <= collisionX1)&& (this.x >= collisionX2)){
-            console.log('inside x collision');
-
             switch(this.shape){
                 case 'triangle':
                     var collisionY1 = coordinateY+side/2;
@@ -216,17 +207,55 @@ class obstacles{
                     var collisionY2 = coordinateY-this.side;
                     break;
             }
-
             if((this.y <= collisionY1)&& (this.y >= collisionY2)){
-                console.log('inside y collision');
-                console.log(`X-player,Y-player = (${coordinateX},${coordinateY})`);
-                console.log(`collisionY1,collisionY2 = (${collisionY1},${collisionY2})`);
-                console.log(`side of player = ${side} and side of obstacle = ${this.side}`);
                 return true;
             }
             return false;
         }
 
+    }
+}
+
+class powerUps{
+    constructor(){
+        this.powers = ['slow','shrink'];
+        this.power = this.powers[randomNumber(0,1)];
+        this.color = '#70A1D7';
+        this.radius = width/60;
+        this.x = width;
+        this.y = randomNumber(this.radius,height-this.radius);
+        switch (this.power) {
+            case 'slow':
+                this.color = '#F7F48B'
+                break;
+            case 'shrink':
+                this.color = '#A1DE93'
+                break;
+        }
+    }
+
+    drawPowerUps(){
+        cb.fillStyle = this.color;
+        cb.beginPath();
+        cb.arc(this.x+this.radius,this.y+this.radius,this.radius,0,2*Math.PI);
+        cb.fill();
+        cb.closePath();
+        this.x -= holesp;
+    }
+
+    collision(coordinateX,coordinateY,side){
+        var collisionX1 = coordinateX+side;
+        var collisionX2 = coordinateX;
+
+        if((this.x <= collisionX1)&& (this.x >= collisionX2)){
+            var collisionY1 = coordinateY+side;
+            var collisionY2 = coordinateY;
+            if((this.y <= collisionY1)&& (this.y >= collisionY2)){
+                console.log('collected power');
+                return this.power;
+            }
+            return false;
+        } 
     }
 }
 
@@ -281,6 +310,7 @@ function highScore(){
     }
     hscore = localStorage.getItem('high');
 }
+
 //falling animation with variable for cancelling it later...
 var fallingAnimationVariable;
 function fallingAnimation(){
@@ -353,6 +383,30 @@ function animate (){
                 }
             }
         }
+
+        if (special[i]){
+            let powerup = special[i];
+            powerup.drawPowerUps();
+            let sp = powerup.collision(player.x,player.y,player.side);
+            if(sp){
+                switch (sp) {
+                    case 'shrink':
+                        player.side = width/30;
+                        setTimeout(()=>{
+                            player.side = width/15;
+                        },7500);
+                        break;
+                    
+                    case 'slow':
+                        holesp -= 2;
+                        setTimeout(()=>{
+                            holesp += 2;
+                        },7500);
+                        break;
+                }
+                special.splice(0,i+1);
+            }
+        }
     }
     player.blockSide(); //draws player square
 }
@@ -360,14 +414,18 @@ function animate (){
 // Variables needed globals
 var holes = [];
 var obs = [];
+var special =[];
 let player = new blockDetails();
 let fall = new fallingDown();
 
 setInterval(() => {
-    console.log('Obstacle created');
     obs.push(new obstacles());
-    highScore();
 }, randomNumber(5000,6000));
+
+setInterval(() => {
+    console.log('PowerUp created');
+    special.push(new powerUps());
+}, randomNumber(1000,3000));
 
 // Iniatiation Functions
 player.blockPositionSetter();
